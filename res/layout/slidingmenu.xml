@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+   android:layout_width="match_parent"
+   android:layout_height="match_parent"
+   android:orientation="vertical"
+   android:background="@color/white" >
+
+    <Button
+        android:id="@+id/home"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="PROMO MSG" 
+        android:textSize="13dp"
+        android:background="@drawable/slide_button"
+        android:layout_marginBottom="1dp"/>
+
+    <Button
+        android:id="@+id/broadcast"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="BROADCAST" 
+        android:textSize="13dp"
+        android:background="@drawable/slide_button"
+        android:layout_marginBottom="1dp"/>
+
+    <Button
+        android:id="@+id/logout"
+        android:layout_width="match_parent"
+        android:textSize="13dp"
+        android:layout_height="wrap_content"
+        android:text="LOGOUT" 
+        android:background="@drawable/slide_button"
+        android:onClick="doLogout"/>
+
+</LinearLayout>

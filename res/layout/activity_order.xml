@@ -1,0 +1,57 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:id="@+id/framesplash"
+    android:layout_height="match_parent"
+    android:foreground="@drawable/shape_window_dim">
+    
+	<RelativeLayout 
+	    android:layout_width="match_parent"
+	    android:layout_height="match_parent"
+	    android:background="@color/white"
+	    android:paddingBottom="@dimen/activity_vertical_margin"
+	    android:paddingLeft="@dimen/activity_horizontal_margin"
+	    android:paddingRight="@dimen/activity_horizontal_margin"
+	    android:paddingTop="@dimen/activity_vertical_margin"
+	    tools:context=".OrderActivity" >
+	
+	    <ListView
+	        android:id="@+id/listView1"
+	        android:layout_width="match_parent"
+	        android:layout_height="match_parent"
+	        android:layout_above="@+id/linearLayout1"
+	        android:paddingBottom="5dp" >
+	    </ListView>
+	
+	    <LinearLayout
+	        android:id="@+id/linearLayout1"
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content"
+	        android:layout_alignParentBottom="true"
+	        android:layout_centerHorizontal="true" >
+	
+	        <Button
+	            android:id="@+id/newOrder"
+	            android:layout_width="0dp"
+	            android:layout_height="wrap_content"
+	            android:layout_marginRight="3dp"
+	            android:layout_weight="1"
+	            android:background="@drawable/new_button"
+	            android:text="@string/new_order"
+	            android:textColor="@color/white"
+	            android:onClick="newOrder" />
+	
+	        <Button
+	            android:id="@+id/doneOrder"
+	            android:layout_width="0dp"
+	            android:layout_height="wrap_content"
+	            android:layout_marginLeft="3dp"
+	            android:layout_weight="1"
+	            android:background="@drawable/new_button"
+	            android:text="@string/done"
+	            android:textColor="@color/white" />
+	
+	    </LinearLayout>
+	
+	</RelativeLayout>
+</FrameLayout>

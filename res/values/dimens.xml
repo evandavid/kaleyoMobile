@@ -1,0 +1,14 @@
+<resources>
+
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin">16dp</dimen>
+    
+    <!-- sliding menu -->
+    <dimen name="slidingmenu_shadow_width">15dp</dimen>
+    <dimen name="slidingmenu_offset">140dp</dimen>
+    
+    <dimen name="flowlayout_horizontal_padding">3dp</dimen>
+  	<dimen name="flowlayout_vertical_padding">2dp</dimen>
+
+</resources>
