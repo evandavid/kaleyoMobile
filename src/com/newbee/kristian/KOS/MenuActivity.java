@@ -1,17 +1,26 @@
 package com.newbee.kristian.KOS;
 
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.gson.Gson;
+import com.newbee.kristian.KOS.models.ApiPromo;
 import com.newbee.kristian.KOS.models.CategoryModel;
+import com.newbee.kristian.KOS.models.Server;
+import com.newbee.kristian.KOS.utils.Connection;
 
 import android.annotation.SuppressLint;
 import android.app.ActionBar;
+import android.app.Activity;
 import android.app.TabActivity;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.TextUtils.TruncateAt;
 import android.util.TypedValue;
 import android.view.Menu;
@@ -26,7 +35,8 @@ public class MenuActivity extends TabActivity {
 	private List<TabSpec> tabspec;
 	public ActionBar actionBar;
 	public static boolean dineIn = true;
-//	private ActionbarSpinnerAdapter adapter;
+	public static Activity act;
+	public static String promo;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -34,7 +44,8 @@ public class MenuActivity extends TabActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_menu);// create the TabHost that will contain the Tabs
         TabHost tabHost = (TabHost)findViewById(android.R.id.tabhost);
-        actionbar_init();
+        act = this;
+       
         
         List<CategoryModel> categories = CategoryModel.listAll(CategoryModel.class);
         this.tabspec = new ArrayList<TabHost.TabSpec>(categories.size());
@@ -52,24 +63,65 @@ public class MenuActivity extends TabActivity {
 	        x.setTypeface(null, Typeface.BOLD);
 		}
         
+        getActionBar().setSubtitle(null);
+        // Get Tables
+ 		new Thread(new Runnable() {
+ 			public void run() {
+ 				getPromo();
+ 			} 		
+ 		}).start();
 	}
+	
+	public void getPromo(){
+		try {
+			Server server = Server.findById(Server.class, (long) 1);
+			Connection conn = new Connection(this);
+			InputStream source = conn.doGetConnect(server.url()+"promos");
+			
+			Gson gson = new Gson();
+			Reader reader = new InputStreamReader(source);
+			ApiPromo response = gson.fromJson(reader, ApiPromo.class);
+
+			if (response.code.equals("OK")) {
+				// set promo
+				promo = "";
+				for (int i = 0; i < 5; i++) {
+					promo = promo + "     " + response.promo;
+				}
+				myHandler.post(updateSukses);
+			}
+		} catch (Exception e) {
+		}
+	}
+	
+	private final Handler myHandler = new Handler();
+    final Runnable updateSukses = new Runnable() {
+        public void run() {
+            sukses();
+        }
+    };
+    
+    private void sukses(){
+    	getActionBar().setSubtitle(promo);
+    }
 	
 	@SuppressLint("NewApi")
 	private void actionbar_init(){
-		getActionBar().setSubtitle("Ayo jual ayam... Ayo jual ayam... Ayo jual ayam... Ayo jual ayam... Ayo jual ayam... Ayo jual ayam... ");
-		getActionBar().setTitle("Table "+ParentActivity.order.getTable().tableName);
+		
+		getActionBar().setTitle("Table "+ParentActivity.order.table.tableName);
 		getActionBar().setHomeButtonEnabled(true);
 		getActionBar().setDisplayHomeAsUpEnabled(true);
-//		getActionBar().setIcon(getResources().getDrawable(
-//				R.drawable.ic_action_previous_item));
-		int subtitleId = Resources.getSystem().
-		getIdentifier("action_bar_subtitle", "id", "android");
 
-		TextView mAppSubtitle=(TextView)findViewById(subtitleId);
+		marqueeSubtitle();
+	}
+	
+	public static void marqueeSubtitle(){
+		int subtitleId = Resources.getSystem().
+				getIdentifier("action_bar_subtitle", "id", "android");
+
+		TextView mAppSubtitle=(TextView)act.getWindow().getDecorView().findViewById(subtitleId);
 
 		mAppSubtitle.setEllipsize(TruncateAt.MARQUEE);
-
-	    mAppSubtitle.setMarqueeRepeatLimit(1);
 
 	    mAppSubtitle.setFocusable(true);
 
@@ -124,7 +176,13 @@ public class MenuActivity extends TabActivity {
 	@Override
 	protected void onResume(){
 		super.onResume();
+		actionbar_init();
 		dineIn = true;
+		new Thread(new Runnable() {
+ 			public void run() {
+ 				getPromo();
+ 			} 		
+ 		}).start();
 	}
 
 }

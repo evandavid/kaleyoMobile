@@ -12,6 +12,7 @@
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:textSize="18sp"
+        android:layout_marginTop="7dp"
         android:text="Dine In"
         android:visibility="gone" />
 
@@ -21,36 +22,36 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/header"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="10dp"
+        android:gravity="center_vertical"
         android:paddingBottom="5dp" >
         
         <LinearLayout 
             android:layout_alignParentRight="true"
-            android:id="@+id/button1"
+            android:id="@+id/editBox"
             android:layout_alignParentTop="true"
             android:layout_width="wrap_content"
+            android:clickable="true"
             android:padding="7dp"
-            android:background="#f4f4f4"
+            android:background="#ccc"
             android:layout_height="wrap_content">
             
             <Button
 	            android:id="@+id/edit"
-	            android:layout_width="30dp"
-	            android:layout_height="30dp"
+	            android:layout_width="20dp"
+	            android:layout_height="20dp"
 	            android:background="@drawable/ic_action_new" />
             
         </LinearLayout>
-
-        
 
         <TextView
             android:id="@+id/numbers"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
-            android:layout_marginRight="5dp"
             android:layout_alignParentTop="true"
             android:layout_centerVertical="true"
+            android:layout_marginRight="5dp"
+            android:layout_marginTop="10dp"
             android:text="2" />
 
         <TextView
@@ -58,87 +59,20 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
-            android:layout_marginRight="50dp"
+            android:layout_marginRight="35dp"
+            android:layout_marginTop="10dp"
             android:layout_toRightOf="@+id/numbers"
-            android:text="Bebek Peking Goreng [Paha] Bebek Peking Goreng [Paha]" />
+            android:text="Bebek Peking Goreng [Paha]" />
         
         <com.newbee.kristian.KOS.utils.FlowLayout
             android:id="@+id/detailBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/menu"
-            android:layout_marginRight="50dp"
+            android:layout_marginRight="35dp"
             android:layout_toRightOf="@+id/numbers" >
 
-	        <TextView
-	            android:id="@+id/textView1"
-	            android:layout_width="wrap_content"
-	            android:layout_height="wrap_content"
-	            android:layout_marginRight="5dp"
-	            android:background="@color/yellow"
-	            android:padding="3dp"
-	            android:text="TextView"
-	            android:textSize="10sp" />
-	
-	        <TextView
-	            android:id="@+id/textView2"
-	            android:layout_width="wrap_content"
-	            android:layout_height="wrap_content"
-	            android:layout_marginRight="5dp"
-	            android:background="@color/yellow"
-	            android:padding="3dp"
-	            android:text="TextView"
-	            android:textSize="10sp" />
 	        
-	        <TextView
-	            android:id="@+id/textView3"
-	            android:layout_width="wrap_content"
-	            android:layout_height="wrap_content"
-	            android:layout_marginRight="5dp"
-	            android:background="@color/yellow"
-	            android:padding="3dp"
-	            android:text="TextView"
-	            android:textSize="10sp" />
-	        
-	        <TextView
-	            android:id="@+id/textView4"
-	            android:layout_width="wrap_content"
-	            android:layout_height="wrap_content"
-	            android:layout_marginRight="5dp"
-	            android:background="@color/yellow"
-	            android:padding="3dp"
-	            android:text="TextView"
-	            android:textSize="10sp" />
-	        
-	        <TextView
-	            android:id="@+id/textView5"
-	            android:layout_width="wrap_content"
-	            android:layout_height="wrap_content"
-	            android:layout_marginRight="5dp"
-	            android:background="@color/yellow"
-	            android:padding="3dp"
-	            android:text="TextView"
-	            android:textSize="10sp" />
-	        
-	        <TextView
-	            android:id="@+id/textView7"
-	            android:layout_width="wrap_content"
-	            android:layout_height="wrap_content"
-	            android:layout_marginRight="5dp"
-	            android:background="@color/yellow"
-	            android:padding="3dp"
-	            android:text="TextView"
-	            android:textSize="10sp" />
-	       
-	        <TextView
-	            android:id="@+id/textView6"
-	            android:layout_width="wrap_content"
-	            android:layout_height="wrap_content"
-	            android:layout_marginRight="5dp"
-	            android:background="@color/yellow"
-	            android:padding="3dp"
-	            android:text="TextView"
-	            android:textSize="10sp" />
 	        
 	    </com.newbee.kristian.KOS.utils.FlowLayout>
 

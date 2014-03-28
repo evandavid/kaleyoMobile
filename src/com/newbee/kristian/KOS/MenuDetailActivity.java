@@ -125,6 +125,7 @@ public class MenuDetailActivity extends ParentActivity {
 	@Override
 	protected void onResume(){
 		super.onResume();
+		MenuActivity.marqueeSubtitle();
 	}
 
 	@Override

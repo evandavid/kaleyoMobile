@@ -37,7 +37,7 @@
             android:paddingLeft="10dp"
             android:paddingRight="10dp"
             android:hint="Username"
-            android:lines="1"/>
+            android:singleLine="true"/>
 
         <EditText
             android:id="@+id/password"
@@ -51,7 +51,7 @@
             android:paddingRight="10dp"
             android:password="true"
             android:hint="Password"
-            android:lines="1"/>
+            android:singleLine="true"/>
 
         <Button
             android:id="@+id/button1"

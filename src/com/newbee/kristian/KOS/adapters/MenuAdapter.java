@@ -4,11 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.newbee.kristian.KOS.MenuActivity;
+import com.newbee.kristian.KOS.OrderActivity;
 import com.newbee.kristian.KOS.ParentActivity;
 import com.newbee.kristian.KOS.R;
 import com.newbee.kristian.KOS.models.Menu;
+import com.newbee.kristian.KOS.models.MenuPopup;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.app.ActionBar.LayoutParams;
 import android.content.Context;
@@ -18,7 +21,9 @@ import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.View.OnClickListener;
+import android.view.inputmethod.InputMethodManager;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
@@ -29,8 +34,9 @@ import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.PopupWindow.OnDismissListener;
+import android.widget.Toast;
 
-@SuppressLint("NewApi")
+@SuppressLint({ "NewApi", "DefaultLocale" })
 public class MenuAdapter extends BaseAdapter {
     
     private Context activity;
@@ -107,7 +113,7 @@ public class MenuAdapter extends BaseAdapter {
 	    		else{
 	    			ll.setBackgroundColor(Color.parseColor("#ffcc33"));
 	    			if (category.toLowerCase().contains("ayam")){
-		    			addNasi(position, vi, false);
+		    			addNasi(position, vi, false, 0);
 		    			llFlag[position] = false;
 	    			}
 	    		}
@@ -125,8 +131,21 @@ public class MenuAdapter extends BaseAdapter {
 				    		pickChild(position, vi, menu);
 				    	}
 				    	else{
-				    		addNasi(position, vi, false);
+				    		addNasi(position, vi, false, 0);
 				    	}
+			    	}else{
+			    		childBox.removeAllViews();
+			    	}
+		    	}
+	    	}else{
+	    		if (llFlag[position] == true){
+		    		childBox.removeAllViews();
+		    	}else{
+		    		if (data.get(position).soldOut.equals("0")){
+				    	if (data.get(position).hasPopup.equals("1"))
+				    		pickChild(position, vi, menu);
+				    	else
+				    		childBox.removeAllViews();
 			    	}else{
 			    		childBox.removeAllViews();
 			    	}
@@ -146,7 +165,7 @@ public class MenuAdapter extends BaseAdapter {
 						    		pickChild(position, vv, menu);
 						    	}
 						    	else{
-						    		addNasi(position, vv, false);
+						    		addNasi(position, vv, false, 0);
 						    	}
 					    	}else{
 					    		childBox.removeAllViews();
@@ -154,7 +173,7 @@ public class MenuAdapter extends BaseAdapter {
 						}else{
 							data.get(position).bagian = null;
 							menuTmp = data.get(position);
-							pickJumlah(position, false, 0, false, menu, null, data.get(position).menuItemName, null);
+							pickJumlah(position, false, 0, false, menu, null, data.get(position).menuItemName, null, 0);
 						}
 					}
 				}
@@ -174,7 +193,10 @@ public class MenuAdapter extends BaseAdapter {
 			if (data.get(position).popups.get(i).soldOut.equals("1")){
 				tv.setBackgroundColor(Color.parseColor("#cccccc"));
 			}else{
-				tv.setBackgroundColor(Color.parseColor("#ffcc33"));
+				if (category.toLowerCase().contains("ayam"))
+					tv.setBackgroundColor(Color.parseColor("#ffcc33"));
+				else
+					tv.setBackgroundColor(Color.parseColor("#ffffff"));
 			}
 			int tmp2 = data.get(position).popups.get(i).amountTmp;
 			tv.setText(tmp2+". "+data.get(position).popups.get(i).menuItemName);
@@ -208,73 +230,142 @@ public class MenuAdapter extends BaseAdapter {
 					if (data.get(position).popups.get(ii).soldOut.equals("0")){
 						data.get(position).bagian = data.get(position).popups.get(ii).menuItemName;
 						Menu tmp = new Menu(data.get(position));
+						for (int j = 0; j < tmp.popups.size(); j++) {
+							for (int k = 0; k < tmp.popups.get(j).nasi.size(); k++) {
+								tmp.popups.get(j).nasi.get(k).amount = 0;
+								tmp.popups.get(j).nasi.get(k).amountTmp = 0;
+							}
+						}
+						
 						menuTmp = tmp;
-						pickJumlah(position, true, ii, false, tv, parent, data.get(position).popups.get(ii).menuItemName, data.get(position).menuItemName);
+						pickJumlah(position, true, ii, false, tv, parent, data.get(position).popups.get(ii).menuItemName, data.get(position).menuItemName, 0);
 					}
 				}
 			});
 	    	
 	    	// add nasi
-	    	addNasi(position, v, true);
+	    	if (category.toLowerCase().contains("ayam"))
+	    		addNasi(position, v, true, i);
 		}
 
     }
     
-    public void addNasi(final int position, View v, boolean hasChild){
+    public void addNasi(final int position, View v, boolean hasChild, final int childPos){
  
     	LinearLayout vi = (LinearLayout)v.findViewById(R.id.childBox);
-    	if (!hasChild)
+    	if (!hasChild){
     		vi.removeAllViews();
-    	for (int j = 0; j < data.get(position).nasi.size(); j++) {
-    	    TextView tvs = new TextView(activity);
-			if (data.get(position).nasi.get(j).soldOut.equals("1")){
-				tvs.setBackgroundColor(Color.parseColor("#cccccc"));
-			}else{
-				tvs.setBackgroundColor(Color.parseColor("#FFFFFF"));
-			}
-			
-			int tmp3 = data.get(position).nasi.get(j).amountTmp;
-			tvs.setText(tmp3+". "+data.get(position).nasi.get(j).menuItemName);
+    		for (int j = 0; j < data.get(position).nasi.size(); j++) {
+        	    TextView tvs = new TextView(activity);
+    			if (data.get(position).nasi.get(j).soldOut.equals("1")){
+    				tvs.setBackgroundColor(Color.parseColor("#cccccc"));
+    			}else{
+    				tvs.setBackgroundColor(Color.parseColor("#FFFFFF"));
+    			}
+    			
+    			int tmp3 = data.get(position).nasi.get(j).amountTmp;
+    			tvs.setText(tmp3+". "+data.get(position).nasi.get(j).menuItemName);
 
-			LinearLayout.LayoutParams paramsd = new LinearLayout.LayoutParams(
-	                LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
-			
-			float scales = activity.getResources().getDisplayMetrics().density;
-			int leftDps = (int) (60*scales + 0.5f);
-			int TopDps = (int) (10*scales + 0.5f);
-			
-			
-            tvs.setPadding(leftDps, TopDps, 0, TopDps);
-	    	tvs.setLayoutParams(paramsd);
-	    	vi.addView(tvs);
-	    	
-	    	//divider
-	    	LinearLayout divd = new LinearLayout(activity);
-	    	LinearLayout.LayoutParams div_paramdd = new LinearLayout.LayoutParams(
-	                LayoutParams.MATCH_PARENT, 1);
-	    	divd.setBackgroundColor(Color.parseColor("#9d9d9d"));
-	    	divd.setLayoutParams(div_paramdd);
-	    	vi.addView(divd);
-	    	
-	    	final int jj = j;
-	    	final TextView tvs2 = tvs;
-	    	tvs.setOnClickListener(new OnClickListener() {
-				
-				@Override
-				public void onClick(View v) {
-					if (data.get(position).nasi.get(jj).soldOut.equals("0")){
-//						menuTmp = data.get(position).nasi.get(jj);
-//						menuTmp.bagian = null;
-						pickJumlah(position, false, jj, true, tvs2, null, data.get(position).nasi.get(jj).menuItemName, null);
-					}
+    			LinearLayout.LayoutParams paramsd = new LinearLayout.LayoutParams(
+    	                LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+    			
+    			float scales = activity.getResources().getDisplayMetrics().density;
+    			int leftDps = (int) (60*scales + 0.5f);
+    			int TopDps = (int) (10*scales + 0.5f);
+    			
+    			
+                tvs.setPadding(leftDps, TopDps, 0, TopDps);
+    	    	tvs.setLayoutParams(paramsd);
+    	    	vi.addView(tvs);
+    	    	
+    	    	//divider
+    	    	LinearLayout divd = new LinearLayout(activity);
+    	    	LinearLayout.LayoutParams div_paramdd = new LinearLayout.LayoutParams(
+    	                LayoutParams.MATCH_PARENT, 1);
+    	    	divd.setBackgroundColor(Color.parseColor("#9d9d9d"));
+    	    	divd.setLayoutParams(div_paramdd);
+    	    	vi.addView(divd);
+    	    	
+    	    	final int jj = j;
+    	    	final TextView tvs2 = tvs;
+    	    	tvs.setOnClickListener(new OnClickListener() {
+    				
+    				@Override
+    				public void onClick(View v) {
+    					if (data.get(position).nasi.get(jj).soldOut.equals("0")){
+    						pickJumlah(position, false, jj, true, tvs2, null, data.get(position).nasi.get(jj).menuItemName, null, jj);
+    					}
+    				}
+    			});
+    		}
+    	}else{
+    		final MenuPopup child = data.get(position).popups.get(childPos);
+    		if (child.nasi == null){
+	    		child.nasi = new ArrayList<Menu>();
+	    		for (int j = 0; j < nas.size(); j++) {
+					Menu nn = new Menu(nas.get(j));
+					child.nasi.add(nn);
 				}
-			});
-		}
+    		
+    		}else{
+    			if (child.nasi.size() < nas.size()){
+		    		for (int j = 0; j < nas.size(); j++) {
+						Menu nn = new Menu(nas.get(j));
+						child.nasi.add(nn);
+					}
+	    		}
+    		}
+    		for (int j = 0; j < child.nasi.size(); j++) {
+        	    TextView tvs = new TextView(activity);
+    			if (child.nasi.get(j).soldOut.equals("1")){
+    				tvs.setBackgroundColor(Color.parseColor("#cccccc"));
+    			}else{
+    				tvs.setBackgroundColor(Color.parseColor("#FFFFFF"));
+    			}
+    			
+    			int tmp3 = child.nasi.get(j).amountTmp;
+    			tvs.setText(tmp3+". "+child.nasi.get(j).menuItemName);
+
+    			LinearLayout.LayoutParams paramsd = new LinearLayout.LayoutParams(
+    	                LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+    			
+    			float scales = activity.getResources().getDisplayMetrics().density;
+    			int leftDps = (int) (60*scales + 0.5f);
+    			int TopDps = (int) (10*scales + 0.5f);
+    			
+    			
+                tvs.setPadding(leftDps, TopDps, 0, TopDps);
+    	    	tvs.setLayoutParams(paramsd);
+    	    	vi.addView(tvs);
+    	    	
+    	    	//divider
+    	    	LinearLayout divd = new LinearLayout(activity);
+    	    	LinearLayout.LayoutParams div_paramdd = new LinearLayout.LayoutParams(
+    	                LayoutParams.MATCH_PARENT, 1);
+    	    	divd.setBackgroundColor(Color.parseColor("#9d9d9d"));
+    	    	divd.setLayoutParams(div_paramdd);
+    	    	vi.addView(divd);
+    	    	
+    	    	final int jj = j;
+    	    	final TextView tvs2 = tvs;
+    	    	tvs.setOnClickListener(new OnClickListener() {
+    				
+    				@Override
+    				public void onClick(View v) {
+    					if (data.get(position).nasi.get(jj).soldOut.equals("0")){
+    						pickJumlah(position, true, childPos, true, tvs2, null, child.nasi.get(jj).menuItemName, null, jj);
+    					}
+    				}
+    			});
+    		}
+    	}
+    	
     }
     
     @SuppressWarnings("deprecation")
-	public void pickJumlah(final int position, boolean hasPopup, final int childpos, final boolean isNasi, 
-    		final TextView textview, final TextView parentview, final String menuName, final String parentName){
+	public void pickJumlah(final int position, final boolean hasPopup, final int childpos, final boolean isNasi, 
+    		final TextView textview, final TextView parentview, final String menuName, final String parentName,
+    		final int nasPos){
     	LayoutInflater inflater = (LayoutInflater)
 				activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE); 
 		final View pWindow = inflater.inflate(R.layout.popup_persons, null);
@@ -283,13 +374,35 @@ public class MenuAdapter extends BaseAdapter {
 		int width = metrics.widthPixels;		
 		pwindo = new PopupWindow(pWindow,
 				(int)(width*0.8), ViewGroup.LayoutParams.WRAP_CONTENT, true);
-		pWindow.findViewById(R.id.button1).post(new Runnable() {
+		try {
+			pwindo.showAtLocation(pWindow, Gravity.CENTER, 0, 0);
+			InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+	    	imm.toggleSoftInput(InputMethodManager.SHOW_FORCED,0);
+		} catch (Exception e) {
+			pWindow.post(new Runnable() {
 
-		    public void run() {
-		    	pwindo.showAtLocation(pWindow, Gravity.CENTER, 0, 0);
-		    }
+			    public void run() {
+			    	pwindo.showAtLocation(pWindow, Gravity.CENTER, 0, 0);
+			    	InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+			    	imm.toggleSoftInput(InputMethodManager.SHOW_FORCED,0);
+			    }
 
+			});
+		}
+		
+
+		Button btn_dismiss = (Button)pWindow.findViewById(R.id.button2);
+		btn_dismiss.setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				layout.getForeground().setAlpha( 0);
+				pwindo.dismiss();
+				((Activity) activity).getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+
+			}
 		});
+		
 		pwindo.setBackgroundDrawable(new BitmapDrawable());
 		pwindo.setOutsideTouchable(true);
 		pwindo.setOnDismissListener(new OnDismissListener() {
@@ -322,43 +435,66 @@ public class MenuAdapter extends BaseAdapter {
 			@Override
 			public void onClick(View v) {
 				if (!et.getText().toString().equals("")){
-//					Menu m = data.get(position);
-					
-					
+
 					if (isNasi){
-						int tmpJml = Integer.parseInt(et.getText().toString());
-						data.get(position).nasi.get(childpos).amountTmp = tmpJml;
-						data.get(position).nasi.get(childpos).amount = tmpJml;
-						textview.setText(tmpJml+". "+menuName);
+						if (hasPopup){
+							if (data.get(position).popups.get(childpos).amount > 0){
+								int tmpJml = Integer.parseInt(et.getText().toString());
+								menuTmp.popups.get(childpos).nasi.get(nasPos).amountTmp = tmpJml;
+								menuTmp.popups.get(childpos).nasi.get(nasPos).amount = tmpJml;
+								textview.setText(tmpJml+". "+menuName);
+							}else{
+								Toast.makeText(activity.getApplicationContext(), "Pilih menu terlebih dahulu, atau pilih nasi melalui tab nasi.", Toast.LENGTH_LONG).show();
+							}
+						}else{
+							if (data.get(position).amount > 0){
+								int tmpJml = Integer.parseInt(et.getText().toString());
+								data.get(position).nasi.get(childpos).amountTmp = tmpJml;
+								data.get(position).nasi.get(childpos).amount = tmpJml;
+								
+								menuTmp.nasi.get(childpos).amountTmp = tmpJml;
+								menuTmp.nasi.get(childpos).amount = tmpJml;
+								textview.setText(tmpJml+". "+menuName);
+							}else{
+								Toast.makeText(activity.getApplicationContext(), "Pilih menu terlebih dahulu, atau pilih nasi melalui tab nasi.", Toast.LENGTH_LONG).show();
+							}
+						}
 					}else{
 						
 						menuTmp.amount = Integer.parseInt(et.getText().toString());
-						if (MenuActivity.dineIn)
-							ParentActivity.order.addMenu(menuTmp);
-						else
-							ParentActivity.order.addTakeHome(menuTmp);
+						menuTmp.dineIn = MenuActivity.dineIn;
+						menuTmp.tambahan = MenuActivity.dineIn ? OrderActivity.tambahan : false;
 						
-						if (parentview != null){
+						ParentActivity.order.addOrder(menuTmp);
+						
+						if (hasPopup){
 							int jml = data.get(position).popups.get(childpos).amountTmp;
 							int tmpJml = Integer.parseInt(et.getText().toString());
 							data.get(position).popups.get(childpos).amountTmp = tmpJml;
+							data.get(position).popups.get(childpos).amount = tmpJml;
+							
+							menuTmp.popups.get(childpos).amountTmp = tmpJml;
+							menuTmp.popups.get(childpos).amount = tmpJml;
 							
 							int jmlParent = data.get(position).amountTmp;
 							int tmpParent = jmlParent + tmpJml - jml;
 							data.get(position).amountTmp = tmpParent;
+							menuTmp.amountTmp = tmpParent;
 							parentview.setText(tmpParent+". "+parentName);
 							textview.setText(tmpJml+". "+menuName);
 						}else {
 							int tmpJml = Integer.parseInt(et.getText().toString());
 							data.get(position).amountTmp = tmpJml;
+							data.get(position).amount = tmpJml;
+							menuTmp.amountTmp = tmpJml;
+							menuTmp.amount = tmpJml;
 							textview.setText(tmpJml+". "+menuName);
 						}
 					}
 					
 					pwindo.dismiss();
 					layout.getForeground().setAlpha( 0);
-//					((Activity) activity).onBackPressed();
-//					pickNasi(position);
+
 				}
 			}
 		});

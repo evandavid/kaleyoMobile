@@ -6,6 +6,7 @@ import com.newbee.kristian.KOS.R;
 import com.newbee.kristian.KOS.models.StaffModel;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -44,6 +45,7 @@ public class StaffAdapter extends BaseAdapter {
         if(convertView==null)
 	            vi = inflater.inflate(R.layout.item_menu_table, null);
 	    if(data.get(position) != null){
+	    	vi.setBackgroundColor(Color.parseColor("#ffffff"));
 	    	TextView menu = (TextView)vi.findViewById(R.id.textView1);
 	    	menu.setText(data.get(position).firstName+" "+data.get(position).lastName);
 			vi.setTag(data.get(position));

@@ -5,15 +5,19 @@ import com.newbee.kristian.KOS.ParentActivity;
 import com.newbee.kristian.KOS.R;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.BitmapDrawable;
 import android.util.DisplayMetrics;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
@@ -30,7 +34,6 @@ import java.util.List;
 import com.newbee.kristian.KOS.models.Order;
 import com.newbee.kristian.KOS.models.StaffModel;
 import com.newbee.kristian.KOS.models.Table;
-import com.newbee.kristian.KOS.models.UserModel;
 import com.newbee.kristian.KOS.utils.TableDropdownMenu;
 
 public class MejaAdapter extends BaseAdapter {
@@ -48,6 +51,7 @@ public class MejaAdapter extends BaseAdapter {
 		this.first = first;
 	}
  
+	@SuppressWarnings("deprecation")
 	@SuppressLint("NewApi")
 	@Override
 	public View getView(final int position, View convertView, ViewGroup parent) {
@@ -68,11 +72,11 @@ public class MejaAdapter extends BaseAdapter {
 			RelativeLayout box = (RelativeLayout) gridView.findViewById(R.id.meja_box);
 			table.setText(mobileValues.get(position).tableName);
 			if (mobileValues.get(position).tableStatus.equals(Table.OCCUPIED)){
-				box.setBackground(context.getResources().getDrawable(
+				box.setBackgroundDrawable(context.getResources().getDrawable(
 						R.drawable.bg_busy));
 			}else{
 				if (mobileValues.get(position).tableStatus.equals(Table.DONE))
-					box.setBackground(context.getResources().getDrawable(
+					box.setBackgroundDrawable(context.getResources().getDrawable(
 						R.drawable.bg_pending));
 			}
 			
@@ -117,16 +121,39 @@ public class MejaAdapter extends BaseAdapter {
 		}else if (mobileValues.get(position).tableStatus.equals(Table.OCCUPIED)){
 			final View pWindow = inflater.inflate(R.layout.popup_table, null);
 			
+			TextView tv = (TextView)pWindow.findViewById(R.id.textView1);
+			tv.setText("Table "+mobileValues.get(position).tableName);
+			
 			DisplayMetrics metrics = context.getResources().getDisplayMetrics();
 			int width = metrics.widthPixels;		
+			int height = metrics.heightPixels;
+			
+			List<String[]> data = TableDropdownMenu.initialize(mobileValues.get(position));
+			int dp = (int) TypedValue.applyDimension( TypedValue.COMPLEX_UNIT_DIP, 50, metrics );
+			int dps = data.size() * dp + dp;
+			
+			int heightl = dps > (int)(height*0.68) ? (int)(height*0.68) : ViewGroup.LayoutParams.WRAP_CONTENT;
 			pwindo = new PopupWindow(pWindow,
-					(int)(width*0.7), ViewGroup.LayoutParams.WRAP_CONTENT, true);
-			pWindow.findViewById(R.id.textView1).post(new Runnable() {
-	
-			    public void run() {
-			    	pwindo.showAtLocation(pWindow, Gravity.CENTER, 0, 0);
-			    }
-	
+					(int)(width*0.7), (int)(heightl), true);
+			try {
+				pwindo.showAtLocation(pWindow, Gravity.CENTER, 0, 0);
+			} catch (Exception e) {
+				pWindow.post(new Runnable() {
+				    public void run() {
+				    	pwindo.showAtLocation(pWindow, Gravity.CENTER, 0, 0);
+				    }
+				});
+			}
+						
+			Button btn_dismiss = (Button)pWindow.findViewById(R.id.button2);
+			btn_dismiss.setOnClickListener(new View.OnClickListener() {
+				
+				@Override
+				public void onClick(View v) {
+					layout.getForeground().setAlpha( 0);
+					pwindo.dismiss();
+					((Activity) context).getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+				}
 			});
 			pwindo.setBackgroundDrawable(new BitmapDrawable());
 			pwindo.setOutsideTouchable(true);
@@ -138,14 +165,10 @@ public class MejaAdapter extends BaseAdapter {
 				}
 			});
 			
-			TextView tv = (TextView)pWindow.findViewById(R.id.textView1);
-			tv.setText("Table "+mobileValues.get(position).tableName);
 			
-			List<String> data = TableDropdownMenu.initialize(mobileValues.get(position));
-			TableMenuAdapter adapter = new TableMenuAdapter(context.getApplicationContext(), data);
+			TableMenuAdapter adapter = new TableMenuAdapter(context, data, layout, pwindo, mobileValues.get(position));
 			ListView lv = (ListView)pWindow.findViewById(R.id.listView1);
 			lv.setAdapter(adapter);
-			
 			this.layout.getForeground().setAlpha( 180);
 		}
 	}
@@ -157,16 +180,27 @@ public class MejaAdapter extends BaseAdapter {
 		final View pWindow = inflater.inflate(R.layout.popup_persons, null);
 		
 		DisplayMetrics metrics = context.getResources().getDisplayMetrics();
-		int width = metrics.widthPixels;		
+		final int width = metrics.widthPixels;		
 		pwindo = new PopupWindow(pWindow,
 				(int)(width*0.8), ViewGroup.LayoutParams.WRAP_CONTENT, true);
-		pWindow.findViewById(R.id.button1).post(new Runnable() {
+		
+		try {
+			pwindo.showAtLocation(pWindow, Gravity.CENTER, 0, 0);
+			InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
+	    	imm.toggleSoftInput(InputMethodManager.SHOW_FORCED,0);
+		} catch (Exception e) {
+			pWindow.post(new Runnable() {
 
-		    public void run() {
-		    	pwindo.showAtLocation(pWindow, Gravity.CENTER, 0, 0);
-		    }
+			    public void run() {
+			    	pwindo.showAtLocation(pWindow, Gravity.CENTER, 0, 0);
+			    	InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
+			    	imm.toggleSoftInput(InputMethodManager.SHOW_FORCED,0);
+			    }
 
-		});
+			});
+		}
+		
+		
 		pwindo.setBackgroundDrawable(new BitmapDrawable());
 		pwindo.setOutsideTouchable(true);
 		pwindo.setOnDismissListener(new OnDismissListener() {
@@ -177,6 +211,18 @@ public class MejaAdapter extends BaseAdapter {
 			}
 		});
 		this.layout.getForeground().setAlpha( 180);
+		
+		Button btn_dismiss = (Button)pWindow.findViewById(R.id.button2);
+		btn_dismiss.setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				layout.getForeground().setAlpha( 0);
+				pwindo.dismiss();
+				((Activity) context).getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+			}
+		});
+		
 		
 		Button btn = (Button)pWindow.findViewById(R.id.button1);
 		TextView tv = (TextView)pWindow.findViewById(R.id.textView1);
@@ -192,10 +238,9 @@ public class MejaAdapter extends BaseAdapter {
 			public void onClick(View v) {
 				if (!et.getText().toString().equals("")){
 					ParentActivity.order = new Order();
-					ParentActivity.order.setPersons(Integer.parseInt(et.getText().toString()));
-					ParentActivity.order.setTable(mobileValues.get(position));
-							
-//					pickStaff(position);
+					ParentActivity.order.persons = (Integer.parseInt(et.getText().toString()));
+					ParentActivity.order.table = mobileValues.get(position).childs.get(mobileValues.get(position).occupiedCount);
+					OrderActivity.tambahan = false;
 					Intent i = new Intent(context.getApplicationContext(), OrderActivity.class);
 			    	context.startActivity(i);	
 			    	pwindo.dismiss();
@@ -215,13 +260,29 @@ public class MejaAdapter extends BaseAdapter {
 		int height = metrics.heightPixels;
 		pwindo = new PopupWindow(pWindow,
 				(int)(width*0.7), (int)(height*0.7), true);
-		pWindow.findViewById(R.id.textView1).post(new Runnable() {
+		try {
+			pwindo.showAtLocation(pWindow, Gravity.CENTER, 0, 0);
+		} catch (Exception e) {
+			pWindow.post(new Runnable() {
 
-		    public void run() {
-		    	pwindo.showAtLocation(pWindow, Gravity.CENTER, 0, 0);
-		    }
+			    public void run() {
+			    	pwindo.showAtLocation(pWindow, Gravity.CENTER, 0, 0);
+			    }
 
+			});
+		}
+		
+
+		Button btn_dismiss = (Button)pWindow.findViewById(R.id.button2);
+		btn_dismiss.setOnClickListener(new View.OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				layout.getForeground().setAlpha( 0);
+				pwindo.dismiss();
+			}
 		});
+		
 		pwindo.setBackgroundDrawable(new BitmapDrawable());
 		pwindo.setOutsideTouchable(true);
 		pwindo.setOnDismissListener(new OnDismissListener() {
@@ -246,7 +307,7 @@ public class MejaAdapter extends BaseAdapter {
 			@Override
 			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
 					long arg3) {
-				ParentActivity.order.setWaitres(arg1.getTag().toString());
+				ParentActivity.order.waitres = (arg1.getTag().toString());
 				Intent i = new Intent(context.getApplicationContext(), OrderActivity.class);
 		    	context.startActivity(i);	 
 			}

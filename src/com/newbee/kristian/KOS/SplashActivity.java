@@ -80,13 +80,13 @@ public class SplashActivity extends ParentActivity {
 		int width = size.x;
 		
 		pwindo = new PopupWindow(pWindow, (int)(width*0.85), ViewGroup.LayoutParams.WRAP_CONTENT, true);
-		new Handler().postDelayed(new Runnable(){
-
-		    public void run() {
+		
+		
+		pWindow.post(new Runnable() {
+			   public void run() {
 		    	pwindo.showAtLocation(pWindow, Gravity.CENTER, 0, 0);
 		    }
-
-		}, 100L);
+		});
 		
 		Button 	 btn  = (Button)pWindow.findViewById(R.id.button1);
 		form = (EditText)pWindow.findViewById(R.id.server);
@@ -130,11 +130,8 @@ public class SplashActivity extends ParentActivity {
 			Server server = Server.findById(Server.class, (long) 1);
 			InputStream source = conn.doGetConnect(server.url()+"categories");
 			
-			System.out.println("hehe "+server.url()+"categories");
-			
 			Gson gson = new Gson();
 			Reader reader = new InputStreamReader(source);
-			System.out.println("hehe "+reader);
 			ApiCategories response = gson.fromJson(reader, ApiCategories.class);
 			
 			if (response.code.equals("OK")) {

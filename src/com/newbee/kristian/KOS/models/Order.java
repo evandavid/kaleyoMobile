@@ -4,70 +4,33 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Order {
-	private int persons;
-	private Table table;
-	private List<Menu> menus = new ArrayList<Menu>();
-	private List<Menu> takeHome = new ArrayList<Menu>();
-	private List<Menu> tambahan = new ArrayList<Menu>();
-	private String waitres;
+	public int persons;
+	public Table table;
+	public String waitres, waitres_name;
+	public String note;
+	public String code;
+	public String orderId;
+	public int total = 0;
+	public List<Menu> menus = new ArrayList<Menu>();
+	public static int DINEIN_CODE = 1000;
+	public static int TAMBAHAN_CODE = 3000;
+	public static int TAKEAWAY_CODE = 2000;
 	
-	public int getPersons() {
-		return persons;
-	}
-	
-	public void setPersons(int persons) {
-		this.persons = persons;
-	}
-	
-	public Table getTable() {
-		return table;
-	}
-	
-	public void setTable(Table table) {
-		this.table = table;
-	}
-	
-	public List<Menu> getMenus() {
-		return menus;
-	}
-	
-	public void setMenus(List<Menu> menus) {
-		this.menus = menus;
-	}
-	
-	public String getWaitres() {
-		return waitres;
-	}
-	
-	public void setWaitres(String waitres) {
-		this.waitres = waitres;
-	}
-
-	public List<Menu> getTakeHome() {
-		return takeHome;
-	}
-
-	public void setTakeHome(List<Menu> takeHome) {
-		this.takeHome = takeHome;
-	}
-
-	public List<Menu> getTambahan() {
-		return tambahan;
-	}
-
-	public void setTambahan(List<Menu> tambahan) {
-		this.tambahan = tambahan;
-	}
-	
-	public void addMenu(Menu menu){
+	public void addOrder(Menu menu){
 		menus.add(menu);
 	}
 	
-	public void addTambahan(Menu menu){
-		tambahan.add(menu);
+	public Order(Order order){
+		this.persons = order.persons;
+		this.table = order.table;
+		this.waitres = order.waitres;
+		this.menus = order.menus;
+		this.note = order.note;
+		this.waitres_name = order.waitres_name;
+		this.orderId = order.orderId;
+		this.total = order.total;
 	}
-	
-	public void addTakeHome(Menu menu){
-		takeHome.add(menu);
+
+	public Order() {
 	}
 }

@@ -31,4 +31,10 @@ public class Table {
 	
 	@SerializedName("occupied_count")
 	public int occupiedCount;
+	
+	@SerializedName("parent_id")
+	public int parentId;
+	
+	@SerializedName("company_id")
+	public String companyId;
 }

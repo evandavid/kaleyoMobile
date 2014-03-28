@@ -3,16 +3,18 @@
    android:layout_width="match_parent"
    android:layout_height="match_parent"
    android:orientation="vertical"
-   android:background="@color/white" >
+   android:background="@color/white"
+   android:id="@+id/slidingBox" >
 
     <Button
-        android:id="@+id/home"
+        android:id="@+id/promo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="PROMO MSG" 
         android:textSize="13dp"
         android:background="@drawable/slide_button"
-        android:layout_marginBottom="1dp"/>
+        android:layout_marginBottom="1dp"
+        android:onClick="PromoCliked"/>
 
     <Button
         android:id="@+id/broadcast"
@@ -20,6 +22,17 @@
         android:layout_height="wrap_content"
         android:text="BROADCAST" 
         android:textSize="13dp"
+        android:background="@drawable/slide_button"
+        android:layout_marginBottom="1dp"
+        android:onClick="BroadcastClicked"/>
+    
+    <Button
+        android:id="@+id/soldout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="SET SOLD OUT" 
+        android:textSize="13dp"
+        android:onClick="SoldOutClicked"
         android:background="@drawable/slide_button"
         android:layout_marginBottom="1dp"/>
 
