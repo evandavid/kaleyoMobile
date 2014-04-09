@@ -17,7 +17,6 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.BaseAdapter;
 import android.widget.Button;
@@ -26,6 +25,7 @@ import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.PopupWindow.OnDismissListener;
 
 public class SpecialRequestAdapter extends BaseAdapter {
@@ -75,13 +75,29 @@ public class SpecialRequestAdapter extends BaseAdapter {
 			vi.setTag(data.get(position));
 			
 			// show quantity
-			if (data.get(position).showQuantity.equals("1"))
-				setAmount(position, vi);
-			else
-				setSpecialReq(position, vi);
-        }else {
+			if (data.get(position).isNote){
+				setNote(position, vi);
+			}else{
+				if (data.get(position).showQuantity.equals("1"))
+					setAmount(position, vi);
+				else
+					setSpecialReq(position, vi);
+			}
+		}else {
         }
         return vi;
+    }
+    
+    private void setNote(final int position, View vi){
+    	vi.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				try {parentWindo.dismiss();} catch (Exception e) {}
+				layout.getForeground().setAlpha( 180);
+				showNoteForm(position);
+			}
+    	
+    	});
     }
     
     private void setSpecialReq(final int position, View vi){
@@ -113,6 +129,91 @@ public class SpecialRequestAdapter extends BaseAdapter {
     }
     
     @SuppressWarnings("deprecation")
+	private void showNoteForm(final int position){
+    	LayoutInflater inflater = (LayoutInflater)
+				activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE); 
+		final View pWindow = inflater.inflate(R.layout.popup_void, null);
+		
+		DisplayMetrics metrics = activity.getResources().getDisplayMetrics();
+		int width = metrics.widthPixels;		
+		pwindo = new PopupWindow(pWindow,
+				(int)(width*0.8), ViewGroup.LayoutParams.WRAP_CONTENT, true);
+		try {
+			pwindo.showAtLocation(pWindow, Gravity.CENTER, 0, 0);
+			((InputMethodManager)activity.getSystemService(Context.INPUT_METHOD_SERVICE)).toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
+		} catch (Exception e) {
+			pWindow.post(new Runnable() {
+			    public void run() {
+			    	pwindo.showAtLocation(pWindow, Gravity.CENTER, 0, 0);
+			    	((InputMethodManager)activity.getSystemService(Context.INPUT_METHOD_SERVICE)).toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
+			    }
+			});
+		}
+		
+
+		Button btn_dismiss = (Button)pWindow.findViewById(R.id.button2);
+		btn_dismiss.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				((InputMethodManager)activity.getSystemService(Context.INPUT_METHOD_SERVICE)).hideSoftInputFromWindow(v.getWindowToken(), 0);
+				layout.getForeground().setAlpha( 0);
+				pwindo.dismiss();
+			}
+		});
+		
+		pwindo.setBackgroundDrawable(new BitmapDrawable());
+		pwindo.setOutsideTouchable(true);
+		pwindo.setOnDismissListener(new OnDismissListener() {
+			@Override
+			public void onDismiss() {
+				layout.getForeground().setAlpha( 0);
+				pwindo.dismiss();
+			}
+		});
+		this.layout.getForeground().setAlpha( 180);
+		
+		Button btn = (Button)pWindow.findViewById(R.id.button1);
+		TextView tv = (TextView)pWindow.findViewById(R.id.textView1);
+		final EditText et = (EditText)pWindow.findViewById(R.id.server);
+		
+		btn.setText("Continue");
+		tv.setText("Special Request Note");
+		
+		et.setHint("note");
+		Menu tmp = ParentActivity.order.menus.get(orderPos);
+		System.out.println("nasi "+tmp.specialNotePos);
+		if (tmp.specialNotePos > 0){
+			et.setText(tmp.specialRequest.get(tmp.specialNotePos-1).requestSummary);
+		}
+		
+		btn.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				if (!et.getText().toString().equals("")){
+					Menu tmp = ParentActivity.order.menus.get(orderPos);
+					if (tmp.specialNotePos < 1){
+						SpecialRequest newReq = new SpecialRequest(data.get(position));
+						newReq.requestSummary = et.getText().toString();
+						newReq.toSave = newReq.requestSummary;
+						tmp.specialRequest.add(newReq);
+						tmp.specialNotePos = tmp.specialRequest.indexOf(newReq)+1;
+					}else{
+						tmp.specialRequest.get(tmp.specialNotePos-1).requestSummary = et.getText().toString();
+						tmp.specialRequest.get(tmp.specialNotePos-1).toSave = et.getText().toString();
+					}
+					OrderActivity.sortData();
+					OrderAdapter adapter = new OrderAdapter(((Activity)activity), ParentActivity.displayOrder.menus, layout, lview);
+					lview.setAdapter(adapter);
+					pwindo.dismiss();
+					layout.getForeground().setAlpha( 0);
+				}else{
+					Toast.makeText(activity, "Cannot blank.", Toast.LENGTH_SHORT).show();
+				}
+			}
+		});
+    }
+    
+    @SuppressWarnings("deprecation")
 	private void showAmountForm(final int position){
     	LayoutInflater inflater = (LayoutInflater)
 				activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE); 
@@ -124,14 +225,10 @@ public class SpecialRequestAdapter extends BaseAdapter {
 				(int)(width*0.8), ViewGroup.LayoutParams.WRAP_CONTENT, true);
 		try {
 			pwindo.showAtLocation(pWindow, Gravity.CENTER, 0, 0);
-			InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
-	    	imm.toggleSoftInput(InputMethodManager.SHOW_FORCED,0);
 		} catch (Exception e) {
 			pWindow.post(new Runnable() {
 			    public void run() {
 			    	pwindo.showAtLocation(pWindow, Gravity.CENTER, 0, 0);
-			    	InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
-			    	imm.toggleSoftInput(InputMethodManager.SHOW_FORCED,0);
 			    }
 			});
 		}
@@ -143,7 +240,6 @@ public class SpecialRequestAdapter extends BaseAdapter {
 			public void onClick(View v) {
 				layout.getForeground().setAlpha( 0);
 				pwindo.dismiss();
-				((Activity) activity).getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 			}
 		});
 		

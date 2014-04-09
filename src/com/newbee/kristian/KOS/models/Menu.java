@@ -51,6 +51,8 @@ public class Menu {
 		category = menu.category;
 		saved = menu.saved;
 		order_item_no = menu.order_item_no;
+		isExpand = menu.isExpand;
+		specialNotePos = menu.specialNotePos;
 		
 		if (menu.specialRequest != null){
 			specialRequest = new ArrayList<SpecialRequest>();
@@ -126,6 +128,9 @@ public class Menu {
 	
 	public int position, nasiPos;
 	public boolean isNasi;
+	
+	public boolean isExpand = false;
+	public int specialNotePos = -1;
 	
 	public int universalSort, localSort, codeOrder;
 	

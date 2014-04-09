@@ -8,7 +8,8 @@
 	<RelativeLayout 
 	    android:layout_width="match_parent"
 	    android:layout_height="match_parent"
-	    tools:context=".MenuDetailActivity" >
+	    tools:context=".MenuDetailActivity" 
+	    android:background="@color/white">
 	
 	    <ListView
 	        android:id="@+id/listView1"

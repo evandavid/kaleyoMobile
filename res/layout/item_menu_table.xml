@@ -38,6 +38,18 @@
 	        android:visibility="gone"
 	        android:textColor="#FFF"
 	        android:layout_marginRight="15dp"/>
+
+	    <ImageView
+	        android:id="@+id/imageView1"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:layout_alignParentRight="true"
+	        android:layout_centerVertical="true"
+	        android:layout_marginLeft="15dp"
+	        android:visibility="gone"
+	        android:layout_marginRight="10dp"
+	        android:src="@drawable/ic_action_expand" />
+
 	</RelativeLayout>
 
     <LinearLayout
@@ -46,7 +58,13 @@
         android:layout_height="wrap_content"
         android:orientation="vertical" >
 
-
+		<LinearLayout
+	        android:id="@+id/childBox2"
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content"
+	        android:orientation="horizontal" >
+        
+		</LinearLayout>
 
     </LinearLayout>
 

@@ -131,20 +131,37 @@ public class OrderAdapter extends BaseAdapter {
 	    	if (data.get(position).specialRequest.size() > 0){
 	    		detailBox.removeAllViews();
 	    		for (int i = 0; i < data.get(position).specialRequest.size(); i++) {
-					SpecialRequest sr = data.get(position).specialRequest.get(i);
-					TextView tt = new TextView(activity);
-			    	tt.setBackgroundColor(Color.parseColor("#ffcc33"));
-			    	tt.setTextSize(10);
-			    	tt.setPadding(3, 3, 3, 3);
-			    	RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
-			                LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-			    	params.setMargins(0, 0, 5, 0);
-			    	tt.setLayoutParams(params);
-			    	if (sr.showQuantity.equals("1"))
-			    		tt.setText(sr.amount+" "+sr.requestName);
-			    	else
-			    		tt.setText(sr.requestName);
-			    	detailBox.addView(tt);
+	    			if (data.get(position).specialNotePos < 1){
+						SpecialRequest sr = data.get(position).specialRequest.get(i);
+						TextView tt = new TextView(activity);
+				    	tt.setBackgroundColor(Color.parseColor("#ffcc33"));
+				    	tt.setTextSize(10);
+				    	tt.setPadding(3, 3, 3, 3);
+				    	RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
+				                LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+				    	params.setMargins(0, 0, 5, 0);
+				    	tt.setLayoutParams(params);
+				    	if (sr.showQuantity.equals("1"))
+				    		tt.setText(sr.amount+" "+sr.requestName);
+				    	else
+				    		tt.setText(sr.requestName);
+				    	detailBox.addView(tt);
+	    			}else{
+	    				SpecialRequest sr = data.get(position).specialRequest.get(i);
+						TextView tt = new TextView(activity);
+				    	tt.setBackgroundColor(Color.parseColor("#ffcc33"));
+				    	tt.setTextSize(10);
+				    	tt.setPadding(3, 3, 3, 3);
+				    	RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(
+				                LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+				    	params.setMargins(0, 0, 5, 0);
+				    	tt.setLayoutParams(params);
+				    	if (sr.showQuantity.equals("1"))
+				    		tt.setText(sr.amount+" "+sr.requestSummary);
+				    	else
+				    		tt.setText(sr.requestSummary);
+				    	detailBox.addView(tt);
+	    			}
 			    	//end create detail
 				}    	
 	    		
@@ -295,18 +312,18 @@ public class OrderAdapter extends BaseAdapter {
 		}else{
 			if (data.get(position).dineIn){
 				if (user.role.equals(User.OPERATOR))
-					tmp = setting_dineIn_user;
+					tmp = setting_dineIn;
 				else
 					tmp = setting_dineIn;
 			}else{
 				if (data.get(position).localSort == 1){
 					if (user.role.equals(User.OPERATOR))
-						tmp = setting_takeHome_user;
+						tmp = setting_takeHome;
 					else
 						tmp = setting_takeHome;
 				}else{
 					if (user.role.equals(User.OPERATOR))
-						tmp = setting_takeHome_user2;
+						tmp = setting_takeHome2;
 					else
 						tmp = setting_takeHome2;
 				}
@@ -319,7 +336,6 @@ public class OrderAdapter extends BaseAdapter {
 		lv.setAdapter(adapter);
 		
 		this.layout.getForeground().setAlpha( 180);
-    }
-    
+    }   
     
 }

@@ -32,5 +32,11 @@ public class SpecialRequest {
 		this.isNote = sr.isNote;
 		this.toSave = sr.toSave;
 	}
+	
+	public SpecialRequest(String sr) {
+		this.requestName = sr;
+		this.isNote = true;
+		this.showQuantity = "0";
+	}
 
 }

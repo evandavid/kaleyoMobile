@@ -83,7 +83,7 @@ public class MejaAdapter extends BaseAdapter {
 			box.setOnClickListener(new View.OnClickListener() {
 				@Override
 				public void onClick(View v) {
-					initiatePopupWindow(position);
+					initiatePopupWindow(position, v);
 				}
 			});
 			
@@ -112,12 +112,12 @@ public class MejaAdapter extends BaseAdapter {
 	
 	@SuppressWarnings("deprecation")
 	@SuppressLint("NewApi")
-	private void initiatePopupWindow(int position) {
+	private void initiatePopupWindow(int position, View vi) {
 		// We need to get the instance of the LayoutInflater
 		LayoutInflater inflater = (LayoutInflater)
 				context.getSystemService(Context.LAYOUT_INFLATER_SERVICE); 
 		if (mobileValues.get(position).tableStatus.equals(Table.AVAILABLE)){
-			person(position);
+			person(position, vi);
 		}else if (mobileValues.get(position).tableStatus.equals(Table.OCCUPIED)){
 			final View pWindow = inflater.inflate(R.layout.popup_table, null);
 			
@@ -174,7 +174,7 @@ public class MejaAdapter extends BaseAdapter {
 	}
 	
 	@SuppressWarnings("deprecation")
-	public void person(final int position){
+	public void person(final int position, final View vi){
 		LayoutInflater inflater = (LayoutInflater)
 				context.getSystemService(Context.LAYOUT_INFLATER_SERVICE); 
 		final View pWindow = inflater.inflate(R.layout.popup_persons, null);
@@ -186,15 +186,14 @@ public class MejaAdapter extends BaseAdapter {
 		
 		try {
 			pwindo.showAtLocation(pWindow, Gravity.CENTER, 0, 0);
-			InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
-	    	imm.toggleSoftInput(InputMethodManager.SHOW_FORCED,0);
+			((InputMethodManager)context.getSystemService(Context.INPUT_METHOD_SERVICE)).toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
+
 		} catch (Exception e) {
 			pWindow.post(new Runnable() {
 
 			    public void run() {
 			    	pwindo.showAtLocation(pWindow, Gravity.CENTER, 0, 0);
-			    	InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
-			    	imm.toggleSoftInput(InputMethodManager.SHOW_FORCED,0);
+					((InputMethodManager)context.getSystemService(Context.INPUT_METHOD_SERVICE)).toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
 			    }
 
 			});
@@ -211,22 +210,22 @@ public class MejaAdapter extends BaseAdapter {
 			}
 		});
 		this.layout.getForeground().setAlpha( 180);
-		
-		Button btn_dismiss = (Button)pWindow.findViewById(R.id.button2);
-		btn_dismiss.setOnClickListener(new View.OnClickListener() {
-			
-			@Override
-			public void onClick(View v) {
-				layout.getForeground().setAlpha( 0);
-				pwindo.dismiss();
-				((Activity) context).getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-			}
-		});
-		
-		
 		Button btn = (Button)pWindow.findViewById(R.id.button1);
 		TextView tv = (TextView)pWindow.findViewById(R.id.textView1);
 		final EditText et = (EditText)pWindow.findViewById(R.id.server);
+		
+		Button btn_dismiss = (Button)pWindow.findViewById(R.id.button2);
+		btn_dismiss.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				((InputMethodManager)context.getSystemService(Context.INPUT_METHOD_SERVICE)).hideSoftInputFromWindow(v.getWindowToken(), 0);
+				layout.getForeground().setAlpha( 0);
+				pwindo.dismiss();
+			}
+		});
+		
+		InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
+		imm.showSoftInput(et, InputMethodManager.SHOW_IMPLICIT);
 		
 		btn.setText("Continue");
 		tv.setText("Table "+mobileValues.get(position).tableName+" - Person");
@@ -238,6 +237,7 @@ public class MejaAdapter extends BaseAdapter {
 			public void onClick(View v) {
 				if (!et.getText().toString().equals("")){
 					ParentActivity.order = new Order();
+					((InputMethodManager)context.getSystemService(Context.INPUT_METHOD_SERVICE)).hideSoftInputFromWindow(v.getWindowToken(), 0);
 					ParentActivity.order.persons = (Integer.parseInt(et.getText().toString()));
 					ParentActivity.order.table = mobileValues.get(position).childs.get(mobileValues.get(position).occupiedCount);
 					OrderActivity.tambahan = false;

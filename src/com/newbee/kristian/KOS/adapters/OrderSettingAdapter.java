@@ -12,6 +12,7 @@ import com.newbee.kristian.KOS.models.ApiSpecialRequest;
 import com.newbee.kristian.KOS.models.Menu;
 import com.newbee.kristian.KOS.models.Order;
 import com.newbee.kristian.KOS.models.Server;
+import com.newbee.kristian.KOS.models.SpecialRequest;
 import com.newbee.kristian.KOS.utils.Connection;
 import com.newbee.kristian.KOS.utils.OrderSetting;
 
@@ -28,7 +29,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -128,14 +128,10 @@ public class OrderSettingAdapter extends BaseAdapter {
    				(int)(width*0.8), ViewGroup.LayoutParams.WRAP_CONTENT, true);
    		try {
    			pwindo.showAtLocation(pWindow, Gravity.CENTER, 0, 0);
-   			InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
-   	    	imm.toggleSoftInput(InputMethodManager.SHOW_FORCED,0);
    		} catch (Exception e) {
    			pWindow.post(new Runnable() {
    			    public void run() {
    			    	pwindo.showAtLocation(pWindow, Gravity.CENTER, 0, 0);
-   			    	InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
-   			    	imm.toggleSoftInput(InputMethodManager.SHOW_FORCED,0);
    			    }
    			});
    		}
@@ -147,7 +143,6 @@ public class OrderSettingAdapter extends BaseAdapter {
    			public void onClick(View v) {
    				layout.getForeground().setAlpha( 0);
    				pwindo.dismiss();
-   				((Activity) activity).getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
    			}
    		});
    		
@@ -215,14 +210,10 @@ public class OrderSettingAdapter extends BaseAdapter {
    				(int)(width*0.8), ViewGroup.LayoutParams.WRAP_CONTENT, true);
    		try {
    			pwindo.showAtLocation(pWindow, Gravity.CENTER, 0, 0);
-   			InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
-   	    	imm.toggleSoftInput(InputMethodManager.SHOW_FORCED,0);
    		} catch (Exception e) {
    			pWindow.post(new Runnable() {
    			    public void run() {
    			    	pwindo.showAtLocation(pWindow, Gravity.CENTER, 0, 0);
-   			    	InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
-   			    	imm.toggleSoftInput(InputMethodManager.SHOW_FORCED,0);
    			    }
    			});
    		}
@@ -234,7 +225,6 @@ public class OrderSettingAdapter extends BaseAdapter {
    			public void onClick(View v) {
    				layout.getForeground().setAlpha( 0);
    				pwindo.dismiss();
-   				((Activity) activity).getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
    			}
    		});
    		
@@ -317,7 +307,19 @@ public class OrderSettingAdapter extends BaseAdapter {
 	            @Override
 	            public void onClick(DialogInterface dialog, int which) {
 	        		try {pwindo.dismiss();} catch (Exception e) {}
-	        		voidNote(position);
+	        		if (ParentActivity.order.menus.get(objData.position).saved)
+	        			voidNote(position);
+	        		else{
+	        			OrderActivity.price = OrderActivity.price - 
+		            			((ParentActivity.order.menus.get(objData.position).amount) 
+		            			* Integer.parseInt(ParentActivity.order.menus.get(objData.position).salesPrice));
+		            	OrderActivity.displayPrice();
+		                //Delete order Activity
+		            	ParentActivity.order.menus.remove(objData.position);
+		            	OrderActivity.sortData();
+		            	OrderAdapter adapter = new OrderAdapter(((Activity)activity), ParentActivity.displayOrder.menus, layout, lview);
+		        		lview.setAdapter(adapter);
+	        		}
 	            }
 	
 	        })
@@ -337,14 +339,10 @@ public class OrderSettingAdapter extends BaseAdapter {
 				(int)(width*0.8), ViewGroup.LayoutParams.WRAP_CONTENT, true);
 		try {
 			pwindo.showAtLocation(pWindow, Gravity.CENTER, 0, 0);
-			InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
-	    	imm.toggleSoftInput(InputMethodManager.SHOW_FORCED,0);
 		} catch (Exception e) {
 			pWindow.post(new Runnable() {
 			    public void run() {
 			    	pwindo.showAtLocation(pWindow, Gravity.CENTER, 0, 0);
-			    	InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
-			    	imm.toggleSoftInput(InputMethodManager.SHOW_FORCED,0);
 			    }
 			});
 		}
@@ -356,7 +354,6 @@ public class OrderSettingAdapter extends BaseAdapter {
 			public void onClick(View v) {
 				layout.getForeground().setAlpha( 0);
 				pwindo.dismiss();
-				((Activity) activity).getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 			}
 		});
 		
@@ -441,7 +438,8 @@ public class OrderSettingAdapter extends BaseAdapter {
 			if (response.code.equals("OK")) {
 				// set data
 				ParentActivity.specialRequest = response.results;
-			
+				SpecialRequest sr = new SpecialRequest("Other");
+				ParentActivity.specialRequest.add(sr);
 				myHandler.post(updateSukses);
 			}else
 				myHandler.post(updateGagal);
@@ -517,7 +515,7 @@ public class OrderSettingAdapter extends BaseAdapter {
 		});
 		TextView tv = (TextView)pWindow.findViewById(R.id.textView1);
 		tv.setText("Special Request");
-
+		
 		SpecialRequestAdapter adapter = new SpecialRequestAdapter(activity, ParentActivity.specialRequest,
 				layout, orderPos, lview, pwindo);
 		ListView lv = (ListView)pWindow.findViewById(R.id.listView1);

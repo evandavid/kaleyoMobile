@@ -68,22 +68,31 @@ public class MoveOrLinkMejaAdapter extends BaseAdapter {
 			TextView table = (TextView) gridView.findViewById(R.id.meja);
 			RelativeLayout box = (RelativeLayout) gridView.findViewById(R.id.meja_box);
 			table.setText(data.get(position).tableName);
-			if (data.get(position).tableStatus.equals(Table.OCCUPIED)){
+			int from = Integer.parseInt(data.get(position).tableId);
+			int to = ParentActivity.editTable.parentId;
+			if (from == to){
 				box.setBackgroundDrawable(context.getResources().getDrawable(
-						R.drawable.bg_busy));
-			}else{
-				if (data.get(position).tableStatus.equals(Table.DONE))
-					box.setBackgroundDrawable(context.getResources().getDrawable(
-						R.drawable.bg_pending));
+					R.drawable.bg_pending));
 			}
-			
-			box.setOnClickListener(new View.OnClickListener() {
-				@Override
-				public void onClick(View v) {
-					
-					processTable(position);
+
+			if (from != to){
+				if (data.get(position).tableStatus.equals(Table.OCCUPIED)){
+					box.setBackgroundDrawable(context.getResources().getDrawable(
+							R.drawable.bg_busy));
+				}else{
+					if (data.get(position).tableStatus.equals(Table.DONE))
+						box.setBackgroundDrawable(context.getResources().getDrawable(
+							R.drawable.bg_pending));
 				}
-			});
+				box.setOnClickListener(new View.OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						System.out.println("kursi target "+data.get(position).tableId);
+						System.out.println("kursi from "+ParentActivity.editTable.parentId);
+						processTable(position);
+					}
+				});
+			}
 			
  
 		} else {

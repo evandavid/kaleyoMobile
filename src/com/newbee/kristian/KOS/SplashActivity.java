@@ -89,6 +89,15 @@ public class SplashActivity extends ParentActivity {
 		});
 		
 		Button 	 btn  = (Button)pWindow.findViewById(R.id.button1);
+		Button 	 btn_exit  = (Button)pWindow.findViewById(R.id.button2);
+		
+		btn_exit.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				SplashActivity.this.finish();
+			}
+		});
+		
 		form = (EditText)pWindow.findViewById(R.id.server);
 		
 		if (super.url != null)

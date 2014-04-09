@@ -23,12 +23,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.View.OnClickListener;
-import android.view.inputmethod.InputMethodManager;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
@@ -50,7 +50,6 @@ public class MenuAdapter extends BaseAdapter {
 	public FrameLayout layout;
 	public List<Menu> nas;
 	public ProgressDialog progress;
-	public boolean[] llFlag;
 	public Menu menuTmp;
     
     public MenuAdapter(Context context, List<Menu> d, List<Menu> nasi, String cat, FrameLayout layout, ProgressDialog progress) {
@@ -60,18 +59,25 @@ public class MenuAdapter extends BaseAdapter {
         this.layout = layout;
         this.progress = progress;
         this.category = cat;
- 
-        llFlag = new boolean[data.size()];
-        for (int i = 0; i < llFlag.length; i++) {
-			llFlag[i] = true;
-		}
         
         for (int i = 0; i < data.size(); i++) {
-        	data.get(i).nasi = new ArrayList<Menu>();
-			data.get(i).nasi.clear();
-			for (int j = 0; j < nas.size(); j++) {
-				Menu nn = new Menu(nas.get(j));
-				data.get(i).nasi.add(nn);
+        	if (data.get(i).hasPopup.equals("1")){
+        		for (int j = 0; j < data.get(i).popups.size(); j++) {
+        			
+        			data.get(i).popups.get(j).nasi = new ArrayList<Menu>();
+        			data.get(i).popups.get(j).nasi.clear();
+					for (int k = 0; k < nas.size(); k++) {
+						Menu nn = new Menu(nas.get(k));
+						data.get(i).popups.get(j).nasi.add(nn);
+					}
+				}
+        	}else{
+	        	data.get(i).nasi = new ArrayList<Menu>();
+				data.get(i).nasi.clear();
+				for (int j = 0; j < nas.size(); j++) {
+					Menu nn = new Menu(nas.get(j));
+					data.get(i).nasi.add(nn);
+				}
 			}
 		}
         this.inflater = (LayoutInflater)activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -102,30 +108,35 @@ public class MenuAdapter extends BaseAdapter {
 	    	final RelativeLayout ll = (RelativeLayout)vi.findViewById(R.id.box);
 	    	final LinearLayout childBox = (LinearLayout)vi.findViewById(R.id.childBox);
 	    	TextView tvsoldout = (TextView)vi.findViewById(R.id.textView2);
+	    	final ImageView img = (ImageView)vi.findViewById(R.id.imageView1);
 	    	
 	    	if (data.get(position).soldOut.equals("1")){
 	    		ll.setBackgroundColor(Color.parseColor("#9d9d9d"));
 	    		menu.setTextColor(Color.parseColor("#ffffff"));
 	    		tvsoldout.setVisibility(View.VISIBLE);
+	    		img.setVisibility(View.GONE);
 	    	}else{
-	    		if (data.get(position).hasPopup.equals("1"))
+	    		if (data.get(position).hasPopup.equals("1")){
 	    			ll.setBackgroundColor(Color.parseColor("#d34b01"));
+	    			menu.setTextColor(Color.parseColor("#ffffff"));}
 	    		else{
 	    			ll.setBackgroundColor(Color.parseColor("#ffcc33"));
+	    			menu.setTextColor(Color.parseColor("#333333"));
 	    			if (category.toLowerCase().contains("ayam")){
-		    			addNasi(position, vi, false, 0);
-		    			llFlag[position] = false;
+//		    			addNasi(position, vi, false, 0);
 	    			}
 	    		}
-	    		menu.setTextColor(Color.parseColor("#333333"));
 	    		tvsoldout.setVisibility(View.GONE);
-	    		
+	    		img.setVisibility(View.VISIBLE);
 	    	}
 	    	
 	    	if (category.toLowerCase().contains("ayam")){
-		    	if (llFlag[position] == true){
-		    		childBox.removeAllViews();
-		    	}else{
+	    		if (!data.get(position).isExpand){
+	    			if (data.get(position).hasPopup.equals("1"))
+	    				childBox.removeAllViews();
+//	    			else
+//			    		addNasi(position, vi, false, 0);
+				}else{
 		    		if (data.get(position).soldOut.equals("0")){
 				    	if (data.get(position).hasPopup.equals("1")){
 				    		pickChild(position, vi, menu);
@@ -136,9 +147,10 @@ public class MenuAdapter extends BaseAdapter {
 			    	}else{
 			    		childBox.removeAllViews();
 			    	}
-		    	}
+				}
 	    	}else{
-	    		if (llFlag[position] == true){
+	    		img.setVisibility(View.GONE);
+	    		if (!data.get(position).isExpand){
 		    		childBox.removeAllViews();
 		    	}else{
 		    		if (data.get(position).soldOut.equals("0")){
@@ -154,22 +166,45 @@ public class MenuAdapter extends BaseAdapter {
 	    	
 	    	
 	    	final View vv = vi;
+	    	
+	    	// double click 
+	    	img.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					//colapse or not
+					if (data.get(position).isExpand){
+						data.get(position).isExpand = false;
+						childBox.removeAllViews();
+						img.setImageResource(R.drawable.ic_action_expand);
+					}else{
+						data.get(position).isExpand = true;
+						img.setImageResource(R.drawable.ic_action_collapse);
+						if (data.get(position).soldOut.equals("0")){
+							if (data.get(position).hasPopup.equals("1")){
+								if (data.get(position).soldOut.equals("0")){
+							    	if (data.get(position).hasPopup.equals("1")){
+							    		pickChild(position, vv, menu);
+							    	}
+							    	else{
+							    		addNasi(position, vv, false, 0);
+							    	}
+						    	}else{
+						    		childBox.removeAllViews();
+						    	}
+							}else{
+								addNasi(position, vv, false, 0);
+							}
+						}
+					}
+				}
+			});
+	    	
+	    	
 			ll.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View v) {
 					if (data.get(position).soldOut.equals("0")){
-						llFlag[position] = false;
 						if (data.get(position).hasPopup.equals("1")){
-							if (data.get(position).soldOut.equals("0")){
-						    	if (data.get(position).hasPopup.equals("1")){
-						    		pickChild(position, vv, menu);
-						    	}
-						    	else{
-						    		addNasi(position, vv, false, 0);
-						    	}
-					    	}else{
-					    		childBox.removeAllViews();
-					    	}
 						}else{
 							data.get(position).bagian = null;
 							menuTmp = data.get(position);
@@ -206,7 +241,7 @@ public class MenuAdapter extends BaseAdapter {
 	                LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
 			
 			float scale = activity.getResources().getDisplayMetrics().density;
-			int leftDp = (int) (30*scale + 0.5f);
+			int leftDp = (int) (20*scale + 0.5f);
 			int TopDp = (int) (10*scale + 0.5f);
 			
 			
@@ -223,8 +258,8 @@ public class MenuAdapter extends BaseAdapter {
 	    	vi.addView(div);
 	    	
 	    	final int ii = i;
+	    		    	
 	    	tv.setOnClickListener(new OnClickListener() {
-				
 				@Override
 				public void onClick(View v) {
 					if (data.get(position).popups.get(ii).soldOut.equals("0")){
@@ -252,11 +287,18 @@ public class MenuAdapter extends BaseAdapter {
     
     public void addNasi(final int position, View v, boolean hasChild, final int childPos){
  
-    	LinearLayout vi = (LinearLayout)v.findViewById(R.id.childBox);
+    	LinearLayout vi = (LinearLayout)v.findViewById(R.id.childBox);    	
     	if (!hasChild){
     		vi.removeAllViews();
+        	LinearLayout vi2 = new LinearLayout(activity);
+        	LinearLayout.LayoutParams paramsx = new LinearLayout.LayoutParams(
+                    LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+        	vi2.setLayoutParams(paramsx);
+        	vi2.setOrientation(LinearLayout.HORIZONTAL);
+        	vi.addView(vi2);
     		for (int j = 0; j < data.get(position).nasi.size(); j++) {
-        	    TextView tvs = new TextView(activity);
+    			
+    			TextView tvs = new TextView(activity);
     			if (data.get(position).nasi.get(j).soldOut.equals("1")){
     				tvs.setBackgroundColor(Color.parseColor("#cccccc"));
     			}else{
@@ -264,27 +306,37 @@ public class MenuAdapter extends BaseAdapter {
     			}
     			
     			int tmp3 = data.get(position).nasi.get(j).amountTmp;
-    			tvs.setText(tmp3+". "+data.get(position).nasi.get(j).menuItemName);
+    			String[] m = data.get(position).nasi.get(j).menuItemName.split(" ");
+    			String ds;
+    			if (m.length > 2){
+    				ds = m[0].substring(0,1)+m[1].substring(0,1)+m[2];
+    			}else{
+    				ds = m[0].substring(0,1)+m[1].substring(0,1);
+    			}
+    			tvs.setText(tmp3+". "+ds);
 
     			LinearLayout.LayoutParams paramsd = new LinearLayout.LayoutParams(
-    	                LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+    	                LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT, 1);
     			
     			float scales = activity.getResources().getDisplayMetrics().density;
-    			int leftDps = (int) (60*scales + 0.5f);
+    			int leftDps = (int) (20*scales + 0.5f);
     			int TopDps = (int) (10*scales + 0.5f);
     			
     			
-                tvs.setPadding(leftDps, TopDps, 0, TopDps);
+    			if (j == 0)
+    				tvs.setPadding(leftDps, TopDps, 0, TopDps);
+    			else
+    				tvs.setPadding(TopDps, TopDps, 0, TopDps);
     	    	tvs.setLayoutParams(paramsd);
-    	    	vi.addView(tvs);
+    	    	vi2.addView(tvs);
     	    	
     	    	//divider
     	    	LinearLayout divd = new LinearLayout(activity);
     	    	LinearLayout.LayoutParams div_paramdd = new LinearLayout.LayoutParams(
-    	                LayoutParams.MATCH_PARENT, 1);
+    	                1, LayoutParams.MATCH_PARENT);
     	    	divd.setBackgroundColor(Color.parseColor("#9d9d9d"));
     	    	divd.setLayoutParams(div_paramdd);
-    	    	vi.addView(divd);
+    	    	vi2.addView(divd);
     	    	
     	    	final int jj = j;
     	    	final TextView tvs2 = tvs;
@@ -300,21 +352,12 @@ public class MenuAdapter extends BaseAdapter {
     		}
     	}else{
     		final MenuPopup child = data.get(position).popups.get(childPos);
-    		if (child.nasi == null){
-	    		child.nasi = new ArrayList<Menu>();
-	    		for (int j = 0; j < nas.size(); j++) {
-					Menu nn = new Menu(nas.get(j));
-					child.nasi.add(nn);
-				}
-    		
-    		}else{
-    			if (child.nasi.size() < nas.size()){
-		    		for (int j = 0; j < nas.size(); j++) {
-						Menu nn = new Menu(nas.get(j));
-						child.nasi.add(nn);
-					}
-	    		}
-    		}
+    		LinearLayout vi2 = new LinearLayout(activity);
+        	LinearLayout.LayoutParams paramsx = new LinearLayout.LayoutParams(
+                    LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+        	vi2.setLayoutParams(paramsx);
+        	vi2.setOrientation(LinearLayout.HORIZONTAL);
+        	vi.addView(vi2);
     		for (int j = 0; j < child.nasi.size(); j++) {
         	    TextView tvs = new TextView(activity);
     			if (child.nasi.get(j).soldOut.equals("1")){
@@ -324,27 +367,36 @@ public class MenuAdapter extends BaseAdapter {
     			}
     			
     			int tmp3 = child.nasi.get(j).amountTmp;
-    			tvs.setText(tmp3+". "+child.nasi.get(j).menuItemName);
+    			String[] m = child.nasi.get(j).menuItemName.split(" ");
+    			String ds;
+    			if (m.length > 2){
+    				ds = m[0].substring(0,1)+m[1].substring(0,1)+m[2];
+    			}else{
+    				ds = m[0].substring(0,1)+m[1].substring(0,1);
+    			}
+    			tvs.setText(tmp3+". "+ds);
 
     			LinearLayout.LayoutParams paramsd = new LinearLayout.LayoutParams(
-    	                LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+    	                LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT, 1);
     			
     			float scales = activity.getResources().getDisplayMetrics().density;
-    			int leftDps = (int) (60*scales + 0.5f);
+    			int leftDps = (int) (30*scales + 0.5f);
     			int TopDps = (int) (10*scales + 0.5f);
     			
-    			
-                tvs.setPadding(leftDps, TopDps, 0, TopDps);
+    			if (j == 0)
+    				tvs.setPadding(leftDps, TopDps, 0, TopDps);
+    			else
+    				tvs.setPadding(TopDps, TopDps, 0, TopDps);
     	    	tvs.setLayoutParams(paramsd);
-    	    	vi.addView(tvs);
+    	    	vi2.addView(tvs);
     	    	
     	    	//divider
     	    	LinearLayout divd = new LinearLayout(activity);
-    	    	LinearLayout.LayoutParams div_paramdd = new LinearLayout.LayoutParams(
-    	                LayoutParams.MATCH_PARENT, 1);
+    	    	LinearLayout.LayoutParams div_paramdd = new LinearLayout.LayoutParams(1, 
+    	                LayoutParams.MATCH_PARENT);
     	    	divd.setBackgroundColor(Color.parseColor("#9d9d9d"));
     	    	divd.setLayoutParams(div_paramdd);
-    	    	vi.addView(divd);
+    	    	vi2.addView(divd);
     	    	
     	    	final int jj = j;
     	    	final TextView tvs2 = tvs;
@@ -352,7 +404,7 @@ public class MenuAdapter extends BaseAdapter {
     				
     				@Override
     				public void onClick(View v) {
-    					if (data.get(position).nasi.get(jj).soldOut.equals("0")){
+    					if (data.get(position).popups.get(childPos).nasi.get(jj).soldOut.equals("0")){
     						pickJumlah(position, true, childPos, true, tvs2, null, child.nasi.get(jj).menuItemName, null, jj);
     					}
     				}
@@ -376,15 +428,11 @@ public class MenuAdapter extends BaseAdapter {
 				(int)(width*0.8), ViewGroup.LayoutParams.WRAP_CONTENT, true);
 		try {
 			pwindo.showAtLocation(pWindow, Gravity.CENTER, 0, 0);
-			InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
-	    	imm.toggleSoftInput(InputMethodManager.SHOW_FORCED,0);
 		} catch (Exception e) {
 			pWindow.post(new Runnable() {
 
 			    public void run() {
 			    	pwindo.showAtLocation(pWindow, Gravity.CENTER, 0, 0);
-			    	InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
-			    	imm.toggleSoftInput(InputMethodManager.SHOW_FORCED,0);
 			    }
 
 			});
@@ -419,8 +467,12 @@ public class MenuAdapter extends BaseAdapter {
 		final EditText et = (EditText)pWindow.findViewById(R.id.server);
 		
 		btn.setText("Continue");
-		if (hasPopup)
-			tv.setText("Amount "+data.get(position).menuItemName+" - "+data.get(position).popups.get(childpos).menuItemName);
+		if (hasPopup){
+			if (isNasi)
+				tv.setText("Amount "+data.get(position).popups.get(childpos).nasi.get(nasPos).menuItemName);
+			else
+				tv.setText("Amount "+data.get(position).menuItemName+" - "+data.get(position).popups.get(childpos).menuItemName);
+		}
 		else{
 			if (isNasi)
 				tv.setText("Amount "+data.get(position).nasi.get(childpos).menuItemName);
@@ -442,7 +494,16 @@ public class MenuAdapter extends BaseAdapter {
 								int tmpJml = Integer.parseInt(et.getText().toString());
 								menuTmp.popups.get(childpos).nasi.get(nasPos).amountTmp = tmpJml;
 								menuTmp.popups.get(childpos).nasi.get(nasPos).amount = tmpJml;
-								textview.setText(tmpJml+". "+menuName);
+								data.get(position).popups.get(childpos).nasi.get(nasPos).amountTmp = tmpJml;
+								data.get(position).popups.get(childpos).nasi.get(nasPos).amount = tmpJml;
+								String[] m = menuName.split(" ");
+				    			String ds;
+				    			if (m.length > 2){
+				    				ds = m[0].substring(0,1)+m[1].substring(0,1)+m[2];
+				    			}else{
+				    				ds = m[0].substring(0,1)+m[1].substring(0,1);
+				    			}
+								textview.setText(tmpJml+". "+ds);
 							}else{
 								Toast.makeText(activity.getApplicationContext(), "Pilih menu terlebih dahulu, atau pilih nasi melalui tab nasi.", Toast.LENGTH_LONG).show();
 							}
@@ -454,7 +515,14 @@ public class MenuAdapter extends BaseAdapter {
 								
 								menuTmp.nasi.get(childpos).amountTmp = tmpJml;
 								menuTmp.nasi.get(childpos).amount = tmpJml;
-								textview.setText(tmpJml+". "+menuName);
+								String[] m = menuName.split(" ");
+				    			String ds;
+				    			if (m.length > 2){
+				    				ds = m[0].substring(0,1)+m[1].substring(0,1)+m[2];
+				    			}else{
+				    				ds = m[0].substring(0,1)+m[1].substring(0,1);
+				    			}
+								textview.setText(tmpJml+". "+ds);
 							}else{
 								Toast.makeText(activity.getApplicationContext(), "Pilih menu terlebih dahulu, atau pilih nasi melalui tab nasi.", Toast.LENGTH_LONG).show();
 							}

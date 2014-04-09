@@ -9,7 +9,6 @@ import com.newbee.kristian.KOS.R;
 import com.newbee.kristian.KOS.models.Order;
 import com.newbee.kristian.KOS.models.Table;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
@@ -19,7 +18,6 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.BaseAdapter;
 import android.widget.Button;
@@ -170,14 +168,12 @@ public class TableMenuAdapter extends BaseAdapter {
 		
 		try {
 			pwindo.showAtLocation(pWindow, Gravity.CENTER, 0, 0);
-			InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
-	    	imm.toggleSoftInput(InputMethodManager.SHOW_FORCED,0);
+			((InputMethodManager)context.getSystemService(Context.INPUT_METHOD_SERVICE)).toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
 		} catch (Exception e) {
 			pWindow.post(new Runnable() {
 			    public void run() {
 			    	pwindo.showAtLocation(pWindow, Gravity.CENTER, 0, 0);
-			    	InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
-			    	imm.toggleSoftInput(InputMethodManager.SHOW_FORCED,0);
+			    	((InputMethodManager)context.getSystemService(Context.INPUT_METHOD_SERVICE)).toggleSoftInput(InputMethodManager.SHOW_FORCED, InputMethodManager.HIDE_IMPLICIT_ONLY);
 			    }
 
 			});
@@ -200,9 +196,9 @@ public class TableMenuAdapter extends BaseAdapter {
 			
 			@Override
 			public void onClick(View v) {
+				((InputMethodManager)context.getSystemService(Context.INPUT_METHOD_SERVICE)).hideSoftInputFromWindow(v.getWindowToken(), 0);
 				layout.getForeground().setAlpha( 0);
 				pwindo.dismiss();
-				((Activity) context).getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 			}
 		});
 		
@@ -220,6 +216,7 @@ public class TableMenuAdapter extends BaseAdapter {
 			@Override
 			public void onClick(View v) {
 				if (!et.getText().toString().equals("")){
+					((InputMethodManager)context.getSystemService(Context.INPUT_METHOD_SERVICE)).hideSoftInputFromWindow(v.getWindowToken(), 0);
 					ParentActivity.order = new Order();
 					ParentActivity.order.persons = (Integer.parseInt(et.getText().toString()));
 					ParentActivity.order.table = (table.childs.get(table.occupiedCount));
